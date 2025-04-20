@@ -1,10 +1,7 @@
 ﻿using System;
-using Dalamud.Game.Gui;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.IoC;
 using Dalamud.Plugin;
-using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Dalamud.Plugin.Services;
 
