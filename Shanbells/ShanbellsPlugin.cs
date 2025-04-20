@@ -9,7 +9,7 @@ namespace Shanbells;
 
 public sealed class ShanbellsPlugin : IDalamudPlugin
 {
-    public string Name => "Shanbells";
+    private string Name => "Shanbells";
 
     private const uint GilComponentNodeId = 18;
     private const uint GilTextNodeId = 2;
@@ -29,7 +29,7 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
         Service.PluginLog.Information($"{Name} disposed.");
     }
 
-    private unsafe void FrameworkOnUpdate(IFramework framework)
+    private void FrameworkOnUpdate(IFramework framework)
     {
         ChangeGilCurrencyName();
         ChangeGilTooltipName();
@@ -47,24 +47,15 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
         {
             var componentNode = currencyAddon->GetComponentByNodeId(GilComponentNodeId);
             if (componentNode == null)
-            {
-                Service.PluginLog.Information($"Currency component node not found.");
                 return;
-            }
             
             var resourceNode = componentNode->GetTextNodeById(GilTextNodeId);
             if (resourceNode == null)
-            {
-                Service.PluginLog.Information($"Currency resource node not found.");
                 return;
-            }
             
             var textNode = resourceNode->GetAsAtkTextNode();
             if (textNode == null)
-            {
-                Service.PluginLog.Information($"Currency text node not found.");
                 return;
-            }
             
             string currentText = textNode->NodeText.ToString();
     
@@ -88,10 +79,7 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
         {
             var textNode = tooltipAddon->GetTextNodeById(GilTooltipTextNodeId);
             if (textNode == null)
-            {
-                Service.PluginLog.Information($"Tooltip text node not found.");
                 return;
-            }
             
             string currentText = textNode->NodeText.ToString();
 
@@ -125,17 +113,12 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
         {
             var textNode = tooltipAddon->GetTextNodeById(GilItemDetailTextNodeId);
             if (textNode == null)
-            {
-                Service.PluginLog.Information($"Item Detail text node not found.");
                 return;
-            }
             
             string currentText = textNode->NodeText.ToString();
 
             if (currentText.Contains("gil"))
-            {
                 textNode->SetText(currentText.Replace("gil", "shanbells"));
-            }
         }
         catch (Exception ex)
         {
