@@ -1,44 +1,11 @@
 ﻿<Project Sdk="Dalamud.NET.Sdk/12.0.2">
     
     <PropertyGroup>
-        <Version>1.0.0</Version>
+        <Version>1.1.0</Version>
         <Description>Shanbells in Eorzea</Description>
         <PackageProjectUrl>https://github.com/kliff-k/ShanbellsPlugin</PackageProjectUrl>
         <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
-
-    <ItemGroup>
-        <Reference Include="Dalamud">
-            <Private>false</Private>
-            <HintPath>$(DalamudDevPath)Dalamud.dll</HintPath>
-        </Reference>
-        <Reference Include="FFXIVClientStructs">
-            <Private>false</Private>
-            <HintPath>$(DalamudDevPath)FFXIVClientStructs.dll</HintPath>
-        </Reference>
-        <Reference Include="ImGui.NET">
-            <Private>false</Private>
-            <HintPath>$(DalamudDevPath)ImGui.NET.dll</HintPath>
-        </Reference>
-        <Reference Include="ImGuiScene">
-            <Private>false</Private>
-            <HintPath>$(DalamudDevPath)ImGuiScene.dll</HintPath>
-        </Reference>
-        <Reference Include="Lumina">
-            <Private>false</Private>
-            <HintPath>$(DalamudDevPath)Lumina.dll</HintPath>
-        </Reference>
-        <Reference Include="Lumina.Excel">
-            <Private>false</Private>
-            <HintPath>$(DalamudDevPath)Lumina.Excel.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Update="ShanbellsPlugin.cs">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Compile>
-    </ItemGroup>
 
 </Project>

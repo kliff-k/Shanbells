@@ -14,6 +14,7 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
     private const uint GilComponentNodeId = 18;
     private const uint GilTextNodeId = 2;
     private const uint GilTooltipTextNodeId = 2;
+    private const uint GilItemDetailTextNodeId = 48;
 
     public ShanbellsPlugin(IDalamudPluginInterface pluginInterface)
     {
@@ -32,6 +33,7 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
     {
         ChangeGilCurrencyName();
         ChangeGilTooltipName();
+        ChangeGilItemDetailName();
     }
 
     private unsafe void ChangeGilCurrencyName()
@@ -109,6 +111,35 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
         catch (Exception ex)
         {
             Service.PluginLog.Error(ex, "Error occurred during UI modification in Tooltip addon.");
+        }
+    }
+
+    private unsafe void ChangeGilItemDetailName()
+    {
+        var tooltipAddon = AtkStage.Instance()->RaptureAtkUnitManager->GetAddonByName("ItemDetail");
+        
+        if (tooltipAddon == null || !tooltipAddon->IsVisible)
+            return;
+        
+        try
+        {
+            var textNode = tooltipAddon->GetTextNodeById(GilItemDetailTextNodeId);
+            if (textNode == null)
+            {
+                Service.PluginLog.Information($"Item Detail text node not found.");
+                return;
+            }
+            
+            string currentText = textNode->NodeText.ToString();
+
+            if (currentText.Contains("gil"))
+            {
+                textNode->SetText(currentText.Replace("gil", "shanbells"));
+            }
+        }
+        catch (Exception ex)
+        {
+            Service.PluginLog.Error(ex, "Error occurred during UI modification in Item Detail addon.");
         }
     }
 }

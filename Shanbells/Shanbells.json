@@ -2,7 +2,7 @@
   "Author": "Kliff!!",
   "Name": "Shanbells",
   "InternalName": "ShanbellsPlugin",
-  "AssemblyVersion": "1.0.0",
+  "AssemblyVersion": "1.1.0",
   "Description": "Replaces the word 'Gil' with 'Shanbells' in the Currency window and Tooltips.",
   "ApplicableVersion": "any",
   "RepoUrl": "https://github.com/kliff-k/ShanbellsPlugin",
