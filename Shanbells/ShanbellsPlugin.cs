@@ -15,6 +15,7 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
     private const uint GilTextNodeId = 2;
     private const uint GilTooltipTextNodeId = 2;
     private const uint GilItemDetailTextNodeId = 48;
+    private const uint GilTalkTextNodeId = 3;
 
     public ShanbellsPlugin(IDalamudPluginInterface pluginInterface)
     {
@@ -31,21 +32,22 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
 
     private void FrameworkOnUpdate(IFramework framework)
     {
-        ChangeGilCurrencyName();
-        ChangeGilTooltipName();
-        ChangeGilItemDetailName();
+        ChangeGilInCurrencyWindow();
+        ChangeGilInTooltips();
+        ChangeGilInItemDetails();
+        ChangeGilInDialog();
     }
 
-    private unsafe void ChangeGilCurrencyName()
+    private unsafe void ChangeGilInCurrencyWindow()
     {
-        var currencyAddon = AtkStage.Instance()->RaptureAtkUnitManager->GetAddonByName("Currency");
+        var addon = AtkStage.Instance()->RaptureAtkUnitManager->GetAddonByName("Currency");
         
-        if (currencyAddon == null || !currencyAddon->IsVisible)
+        if (addon == null || !addon->IsVisible)
             return;
         
         try
         {
-            var componentNode = currencyAddon->GetComponentByNodeId(GilComponentNodeId);
+            var componentNode = addon->GetComponentByNodeId(GilComponentNodeId);
             if (componentNode == null)
                 return;
             
@@ -68,16 +70,16 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
         }
     }
 
-    private unsafe void ChangeGilTooltipName()
+    private unsafe void ChangeGilInTooltips()
     {
-        var tooltipAddon = AtkStage.Instance()->RaptureAtkUnitManager->GetAddonByName("Tooltip");
+        var addon = AtkStage.Instance()->RaptureAtkUnitManager->GetAddonByName("Tooltip");
         
-        if (tooltipAddon == null || !tooltipAddon->IsVisible)
+        if (addon == null || !addon->IsVisible)
             return;
         
         try
         {
-            var textNode = tooltipAddon->GetTextNodeById(GilTooltipTextNodeId);
+            var textNode = addon->GetTextNodeById(GilTooltipTextNodeId);
             if (textNode == null)
                 return;
             
@@ -102,16 +104,16 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
         }
     }
 
-    private unsafe void ChangeGilItemDetailName()
+    private unsafe void ChangeGilInItemDetails()
     {
-        var tooltipAddon = AtkStage.Instance()->RaptureAtkUnitManager->GetAddonByName("ItemDetail");
+        var addon = AtkStage.Instance()->RaptureAtkUnitManager->GetAddonByName("ItemDetail");
         
-        if (tooltipAddon == null || !tooltipAddon->IsVisible)
+        if (addon == null || !addon->IsVisible)
             return;
         
         try
         {
-            var textNode = tooltipAddon->GetTextNodeById(GilItemDetailTextNodeId);
+            var textNode = addon->GetTextNodeById(GilItemDetailTextNodeId);
             if (textNode == null)
                 return;
             
@@ -123,6 +125,30 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
         catch (Exception ex)
         {
             Service.PluginLog.Error(ex, "Error occurred during UI modification in Item Detail addon.");
+        }
+    }
+
+    private unsafe void ChangeGilInDialog()
+    {
+        var addon = AtkStage.Instance()->RaptureAtkUnitManager->GetAddonByName("Talk");
+        
+        if (addon == null || !addon->IsVisible)
+            return;
+        
+        try
+        {
+            var textNode = addon->GetTextNodeById(GilTalkTextNodeId);
+            if (textNode == null)
+                return;
+            
+            string currentText = textNode->NodeText.ToString();
+
+            if (currentText.Contains("gil"))
+                textNode->SetText(currentText.Replace("gil", "shanbells"));
+        }
+        catch (Exception ex)
+        {
+            Service.PluginLog.Error(ex, "Error occurred during UI modification in Talk addon.");
         }
     }
 }

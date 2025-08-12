@@ -6,7 +6,7 @@
   "Description": "Replaces the word 'Gil' with 'Shanbells' in the Currency window and Tooltips.",
   "ApplicableVersion": "any",
   "RepoUrl": "https://github.com/kliff-k/ShanbellsPlugin",
-  "DalamudApiLevel": 12,
+  "DalamudApiLevel": 13,
   "Punchline": "Bringing shananigans to Eorzea",
   "AcceptsFeedback": true,
   "IconUrl": "https://github.com/kliff-k/ShanbellsPlugin/raw/main/icon.png",
