@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
 using Dalamud.Game.Command;
@@ -15,11 +16,9 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
     private string Name => "Shanbells";
     
     private const string CommandName = "/sbconfig";
-    private readonly IDalamudPluginInterface _pluginInterface;
     private readonly Configuration _configuration;
     private readonly ConfigWindow _configWindow;
     private readonly WindowSystem _windowSystem = new("Shanbells");
-
 
     private const uint GilComponentNodeId = 18;
     private const uint GilTextNodeId = 2;
@@ -29,11 +28,9 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
 
     public ShanbellsPlugin(IDalamudPluginInterface pluginInterface)
     {
-        _pluginInterface = pluginInterface;
         Service.Initialize(pluginInterface);
         
-        _configuration = _pluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-        _configuration.Initialize(_pluginInterface);
+        _configuration = Service.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         
         _configWindow = new ConfigWindow(_configuration);
         _windowSystem.AddWindow(_configWindow);
@@ -43,13 +40,16 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
             HelpMessage = "Opens the Shanbells configuration window."
         });
 
-        _pluginInterface.UiBuilder.Draw += DrawUi;
-        _pluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
+        Service.PluginInterface.UiBuilder.Draw += DrawUi;
+        Service.PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
 
-        Service.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "Currency", OnAddonSetup);
-        Service.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "Tooltip", OnAddonSetup);
-        Service.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "ItemDetail", OnAddonSetup);
-        Service.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "Talk", OnAddonSetup);
+        Service.AddonLifecycle.RegisterListener(AddonEvent.PostRequestedUpdate, "Currency", OnAddonSetup);
+        Service.AddonLifecycle.RegisterListener(AddonEvent.PreRequestedUpdate, "Tooltip", OnAddonSetup);
+        Service.AddonLifecycle.RegisterListener(AddonEvent.PostRequestedUpdate, "ItemDetail", OnAddonSetup);
+        // I'm not comfortable with this one. Too much potential for wrong replacements.
+        // And I don't want to run a complex regex. I might go back to this in the future.
+        // Service.AddonLifecycle.RegisterListener(AddonEvent.PostSetup, "Talk", OnAddonSetup);
+        
         Service.PluginLog.Information($"{Name} loaded.");
     }
 
@@ -59,18 +59,17 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
         _configWindow.Dispose();
         
         Service.CommandManager.RemoveHandler(CommandName);
-        _pluginInterface.UiBuilder.Draw -= DrawUi;
-        _pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
+        Service.PluginInterface.UiBuilder.Draw -= DrawUi;
+        Service.PluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
 
         Service.AddonLifecycle.UnregisterListener(OnAddonSetup);
         Service.PluginLog.Information($"{Name} disposed.");
     }
-    
+
     private void OnCommand(string command, string args) => OpenConfigUi();
     private void DrawUi() => _windowSystem.Draw();
     private void OpenConfigUi() => _configWindow.IsOpen = true;
 
-    
     private unsafe void OnAddonSetup(AddonEvent type, AddonArgs args)
     {
         var addon = (AtkUnitBase*)args.Addon.Address;
@@ -86,9 +85,7 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
                 ChangeGilInItemDetails(addon);
                 break;
             case "Talk":
-                // I'm not comfortable with this one. Too much potential for wrong replacements.
-                // And don't want to run a complex regex. I might go back to this in the future.
-                // ChangeGilInDialog(addon);
+                ChangeGilInDialog(addon);
                 break;
         }
     }
@@ -97,7 +94,7 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
     private unsafe void ChangeGilInCurrencyWindow(AtkUnitBase* addon)
     {
         if (addon == null) return;
-
+        
         try
         {
             var componentNode = addon->GetComponentByNodeId(GilComponentNodeId);
@@ -113,6 +110,7 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
                 return;
 
             string currentText = textNode->NodeText.ToString();
+            textNode->SetText(_configuration.ReplacementString);
 
             if (currentText == "Gil")
                 textNode->SetText(_configuration.ReplacementString);
@@ -133,19 +131,30 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
             if (textNode == null)
                 return;
 
-            string currentText = textNode->NodeText.ToString();
+            var seString = SeString.Parse(textNode->NodeText.AsSpan());
 
-            if (currentText == "H�%I�&GilIH")
+            var textPayload = seString.Payloads.OfType<TextPayload>().FirstOrDefault(p => p.Text == "Gil");
+            if (textPayload == null)
+                return;
+    
+            var newPayloads = seString.Payloads.Select(payload =>
             {
-                var lines = new SeString();
-                lines.Payloads.Add(new UIForegroundPayload(549));
-                lines.Payloads.Add(new UIGlowPayload(550));
-                lines.Payloads.Add(new TextPayload(_configuration.ReplacementString));
-                lines.Payloads.Add(new UIGlowPayload(0));
-                lines.Payloads.Add(new UIForegroundPayload(0));
-                textNode->SetText(lines.Encode());
-                textNode->ResizeNodeForCurrentText();
-                textNode->NextSiblingNode->SetWidth(85);
+                if (payload is TextPayload { Text: "Gil" })
+                {
+                    return new TextPayload(_configuration.ReplacementString);
+                }
+                return payload;
+            }).ToList();
+            
+            var newSeString = new SeString(newPayloads);
+            
+            textNode->SetText(newSeString.Encode());
+            textNode->ResizeNodeForCurrentText();
+    
+            if (textNode->NextSiblingNode != null)
+            {
+                var newWidth = (ushort)(textNode->AtkResNode.Width + 18);
+                textNode->NextSiblingNode->SetWidth(newWidth);
             }
         }
         catch (Exception ex)

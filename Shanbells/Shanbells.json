@@ -3,7 +3,7 @@
   "Name": "Shanbells",
   "InternalName": "ShanbellsPlugin",
   "AssemblyVersion": "1.2.0",
-  "Description": "Replaces the word 'Gil' with 'Shanbells' in the Currency window and Tooltips.",
+  "Description": "Replaces the word 'Gil' with 'Shanbells' (or something else entirely!) in the Currency window and Tooltips.",
   "ApplicableVersion": "any",
   "RepoUrl": "https://github.com/kliff-k/ShanbellsPlugin",
   "DalamudApiLevel": 13,

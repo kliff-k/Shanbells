@@ -1,5 +1,4 @@
 using Dalamud.Configuration;
-using Dalamud.Plugin;
 using System;
 
 namespace Shanbells;
@@ -11,16 +10,8 @@ public class Configuration : IPluginConfiguration
 
     public string ReplacementString { get; set; } = "Shanbells";
 
-    [NonSerialized]
-    private IDalamudPluginInterface? _pluginInterface;
-
-    public void Initialize(IDalamudPluginInterface pInterface)
-    {
-        _pluginInterface = pInterface;
-    }
-
     public void Save()
     {
-        _pluginInterface!.SavePluginConfig(this);
+        Service.PluginInterface.SavePluginConfig(this);
     }
 }
