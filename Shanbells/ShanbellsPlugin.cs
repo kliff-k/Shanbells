@@ -42,6 +42,7 @@ public sealed class ShanbellsPlugin : IDalamudPlugin
 
         Service.PluginInterface.UiBuilder.Draw += DrawUi;
         Service.PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
+        Service.PluginInterface.UiBuilder.OpenMainUi += OpenConfigUi;
 
         Service.AddonLifecycle.RegisterListener(AddonEvent.PostRequestedUpdate, "Currency", OnAddonSetup);
         Service.AddonLifecycle.RegisterListener(AddonEvent.PreRequestedUpdate, "Tooltip", OnAddonSetup);
